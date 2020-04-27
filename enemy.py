@@ -102,6 +102,8 @@ class BigEnemy(pygame.sprite.Sprite):
             self.reset()
 
     def reset(self):
+        self.active = True
         self.energy = self.__class__.energy
         self.rect.left = randint(0, self.width - self.rect.width)
         self.rect.top = randint(-15 * self.height, -5 * self.height)
+
