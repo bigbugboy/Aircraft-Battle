@@ -25,8 +25,13 @@ class Ship(pygame.sprite.Sprite):
 
     def blitme(self):
         if self.active:
-            me_image = self.image1 if self.ab_settings.switch_image else self.image2
-            self.screen.blit(me_image, self.rect)
+            if self.invincible:
+                if not(self.ab_settings.delay % 6):
+                    me_image = self.image1 if self.ab_settings.switch_image else self.image2
+                    self.screen.blit(me_image, self.rect)
+            else:
+                me_image = self.image1 if self.ab_settings.switch_image else self.image2
+                self.screen.blit(me_image, self.rect)
         else:
             if not(self.ab_settings.delay % 3):
                 if self.ab_settings.me_destroy_index == 0:
@@ -34,9 +39,7 @@ class Ship(pygame.sprite.Sprite):
                 self.screen.blit(self.destroy_images[self.ab_settings.me_destroy_index], self.rect)
                 self.ab_settings.me_destroy_index = (self.ab_settings.me_destroy_index + 1) % len(self.destroy_images)
                 if self.ab_settings.me_destroy_index == 0:
-                    print('Game over')
                     self.reset()
-
 
     def move_up(self):
         if self.rect.top > 0:

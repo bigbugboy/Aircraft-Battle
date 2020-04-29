@@ -23,7 +23,10 @@ class Settings:
         self.BLACK = (0, 0, 0)
         self.GREEN = (0, 255, 0)
         self.RED = (255, 0, 0)
-
+        self.score = 0
+        self.recorded = self.get_recorded()
+        self.me_life_left = 3
+        self.INVINCIBLE_TIME = pygame.USEREVENT
 
     def init_game(self):
         pygame.init()
@@ -36,6 +39,10 @@ class Settings:
     def init_play_music(self):
         if self.is_start_music:
             pygame.mixer.music.play(-1)
+
+    def stop_all_music(self):
+        pygame.mixer.music.stop()
+        self.enemy3_fly_sound.stop()
 
     def init_load_music_sound(self):
         pygame.mixer.music.load("sounds/game_music.ogg")
@@ -72,3 +79,16 @@ class Settings:
 
     def draw_energy(self, screen, color, start, end, width):
         pygame.draw.line(screen, color, start, end, width)
+
+    def get_recorded(self):
+        if not os.path.exists('recorded.txt'):
+            return 0
+        else:
+            with open('recorded.txt', 'r', encoding='utf-8') as f:
+                return int(f.read().strip())
+
+    def update_recorded(self):
+        if self.score > self.recorded:
+            self.recorded = self.score
+            with open('recorded.txt', 'w', encoding='utf-8') as f:
+                f.write(str(self.score))
