@@ -14,7 +14,16 @@ class Settings:
         self.delay = 100    # 延迟操作的变量，每帧减一
         self.switch_image = True
         self.bullet1_num = 4
-        self.bullet1_index = 0
+        self.bullet1_index = 0      # 绘制是切换索引
+        self.e1_destroy_index = 0  # 小型敌机击中时绘制切换索引
+        self.e2_destroy_index = 0
+        self.e3_destroy_index = 0
+        self.me_destroy_index = 0
+        self.WHITE = (255, 255, 255)
+        self.BLACK = (0, 0, 0)
+        self.GREEN = (0, 255, 0)
+        self.RED = (255, 0, 0)
+
 
     def init_game(self):
         pygame.init()
@@ -22,6 +31,7 @@ class Settings:
         pygame.display.set_caption(self.caption)
         self.init_load_music_sound()
         self.init_play_music()
+        self.generate_enemy_groups()
 
     def init_play_music(self):
         if self.is_start_music:
@@ -49,8 +59,16 @@ class Settings:
         self.enemy2_down_sound = pygame.mixer.Sound("sounds/enemy2_down.wav")
         self.enemy2_down_sound.set_volume(0.2)
         self.enemy3_down_sound = pygame.mixer.Sound("sounds/enemy3_down.wav")
-        self.enemy3_down_sound.set_volume(0.5)
+        self.enemy3_down_sound.set_volume(0.3)
         self.me_down_sound = pygame.mixer.Sound("sounds/me_down.wav")
         self.me_down_sound.set_volume(0.2)
 
+    def generate_enemy_groups(self):
+        self.enemys = pygame.sprite.Group()
+        self.small_enemys = pygame.sprite.Group()
+        self.mid_enemys = pygame.sprite.Group()
+        self.big_enemys = pygame.sprite.Group()
+        self.blit_enemy_order = [self.big_enemys, self.mid_enemys, self.small_enemys]
 
+    def draw_energy(self, screen, color, start, end, width):
+        pygame.draw.line(screen, color, start, end, width)

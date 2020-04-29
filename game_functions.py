@@ -23,11 +23,13 @@ def check_event(me):
     check_me_move(me)
 
 
-def update_screen(ab_settings, screen, me, bullet1s, enemys):
+def update_screen(ab_settings, screen, me, bullet1s):
     screen.blit(ab_settings.bg_image, (0, 0))
     me.blitme()
     blit_bullet(ab_settings, bullet1s)
-    blit_enemy(enemys)
+    blit_enemy(ab_settings)
+    check_bullet_hit_enemy(ab_settings, bullet1s)
+    check_enemy_hit_me(ab_settings, me)
     pygame.display.flip()
 
 
@@ -67,16 +69,58 @@ def blit_bullet(ab_settings, bullet1s):
         bullet.blitme()
 
 
-def generate_enemy(group1, group2, enemy_type, num, ab_settings, screen):
+def generate_small_enemys(enemy_type, num, ab_settings, screen):
     for _ in range(num):
-        e = enemy_type(ab_settings, screen)
-        group1.add(e)
-        group2.add(e)
+        enemy1 = enemy_type.SmallEnemy(ab_settings, screen)
+        ab_settings.enemys.add(enemy1)
+        ab_settings.small_enemys.add(enemy1)
 
 
-def blit_enemy(enemys):
-    for e in enemys:
-        e.move()
-        e.blitme()
+def generate_mid_enemys(enemy_type, num, ab_settings, screen):
+    for _ in range(num):
+        enemy2 = enemy_type.MidEnemy(ab_settings, screen)
+        ab_settings.enemys.add(enemy2)
+        ab_settings.mid_enemys.add(enemy2)
 
 
+def generate_big_enemys(enemy_type, num, ab_settings, screen):
+    for _ in range(num):
+        enemy3 = enemy_type.BigEnemy(ab_settings, screen)
+        ab_settings.enemys.add(enemy3)
+        ab_settings.big_enemys.add(enemy3)
+
+
+
+def blit_enemy(ab_settings):
+    for enemy_type in ab_settings.blit_enemy_order:
+        for enemy in enemy_type:
+            enemy.move()
+            enemy.blitme()
+
+
+def check_bullet_hit_enemy(ab_settings, bullet1s):
+    for bullet in bullet1s:
+        if bullet.active:
+            enemy_hit = pygame.sprite.spritecollide(
+                bullet, ab_settings.enemys,
+                False, pygame.sprite.collide_mask)
+            if enemy_hit:
+                bullet.active = False
+                for enemy in enemy_hit:
+                    if enemy in ab_settings.mid_enemys or enemy in ab_settings.big_enemys:
+                        enemy.energy -= 1
+                        if enemy.energy == 0:
+                            enemy.active = False
+                    else:
+                        enemy.active = False
+
+
+def check_enemy_hit_me(ab_settings, me):
+    if me.active and not me.invincible:
+        enemy_down = pygame.sprite.spritecollide(
+            me, ab_settings.enemys,
+            False, pygame.sprite.collide_mask)
+        if enemy_down:
+            me.active = False
+            for enemy in enemy_down:
+                enemy.active = False

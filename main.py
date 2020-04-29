@@ -13,22 +13,16 @@ def main():
     ab_settings.bg_image = pygame.image.load('images/background.png').convert_alpha()
     me = Ship(screen, ab_settings)
     bullet1s = gf.generate_bullet(Bullet1, screen, ab_settings, me)
-    enemys = pygame.sprite.Group()
-    small_enemys = pygame.sprite.Group()
-    mid_enemys = pygame.sprite.Group()
-    big_enemys = pygame.sprite.Group()
-    gf.generate_enemy(enemys, small_enemys, enemy.SmallEnemy, 15, ab_settings, screen)
-    gf.generate_enemy(enemys, mid_enemys, enemy.MidEnemy, 5, ab_settings, screen)
-    gf.generate_enemy(enemys, big_enemys, enemy.BigEnemy, 1, ab_settings, screen)
-
-
+    gf.generate_small_enemys(enemy, 15, ab_settings, screen)
+    gf.generate_mid_enemys(enemy, 5, ab_settings, screen)
+    gf.generate_big_enemys(enemy, 1, ab_settings, screen)
 
 
     while 1:
         gf.check_event(me)
         gf.is_switch_image(ab_settings)
         gf.update_delay(ab_settings)
-        gf.update_screen(ab_settings, screen, me, bullet1s, enemys)
+        gf.update_screen(ab_settings, screen, me, bullet1s)
         ab_settings.clock.tick(60)
 
 

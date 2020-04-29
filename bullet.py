@@ -13,6 +13,7 @@ class Bullet1(pygame.sprite.Sprite):
         self.speed = 12
         self.active = True
         self.reset()
+        self.mask = pygame.mask.from_surface(self.image)
 
     def move(self):
         self.rect.top -= self.speed
