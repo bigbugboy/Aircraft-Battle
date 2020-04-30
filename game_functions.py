@@ -5,7 +5,7 @@ from pygame.locals import *
 
 def check_me_move(me, ab_state):
     """检测我放飞机移动事件"""
-    if ab_state.game_active:
+    if ab_state.game_active and not ab_state.game_paused:
         key_pressed = pygame.key.get_pressed()
         if key_pressed[K_w] or key_pressed[K_UP]:
             me.move_up()
@@ -26,26 +26,57 @@ def check_event(me, ab_settings, ab_state, ab_board):
             me.invincible = False
             pygame.time.set_timer(ab_settings.INVINCIBLE_TIME, 0)
         elif event.type == MOUSEBUTTONDOWN:
-            # 重新开始
-            if event.button == 1 and ab_board.again_rect.collidepoint(event.pos):
-                ab_settings.bullet_sound.play()
-                time.sleep(1)
-                import main
-                main.main()
-            elif event.button == 1 and ab_board.game_over_rect.collidepoint(event.pos):
-                sys.exit()
+            # 游戏结束时
+            if not ab_state.game_active:
+                if event.button == 1 and ab_board.again_rect.collidepoint(event.pos):
+                    ab_settings.bullet_sound.play()
+                    time.sleep(0.6)
+                    import main
+                    main.main()
+                elif event.button == 1 and ab_board.game_over_rect.collidepoint(event.pos):
+                    sys.exit()
+            else:
+                if event.button == 1 and ab_board.pause_rect.collidepoint(event.pos):
+                    ab_state.game_paused = not ab_state.game_paused
+                    if ab_state.game_paused:
+                        ab_board.pause_resume_image = ab_board.resume_nor_image
+                        set_game_paused(ab_settings)
+                    else:
+                        ab_board.pause_resume_image = ab_board.pause_nor_image
+                        set_game_resume(ab_settings)
+
+        elif event.type == MOUSEMOTION:
+            if ab_board.pause_rect.collidepoint(event.pos):
+                if ab_state.game_paused:
+                    ab_board.pause_resume_image = ab_board.resume_pressed_image
+                else:
+                    ab_board.pause_resume_image = ab_board.pause_pressed_image
+            else:
+                if ab_state.game_paused:
+                    ab_board.pause_resume_image = ab_board.resume_nor_image
+                else:
+                    ab_board.pause_resume_image = ab_board.pause_nor_image
+
+
+def set_game_paused(ab_settings):
+    ab_settings.pause_music()
+
+def set_game_resume(ab_settings):
+    ab_settings.resume_music()
 
 
 def update_screen(ab_settings, screen, me, bullet1s, ab_board, ab_state):
     screen.blit(ab_settings.bg_image, (0, 0))
     if ab_state.game_active:
-        ab_board.draw_score_board()
-        ab_board.draw_me_life()
-        me.blitme()
-        blit_bullet(ab_settings, bullet1s)
-        blit_enemy(ab_settings)
-        check_bullet_hit_enemy(ab_settings, bullet1s)
-        check_enemy_hit_me(ab_settings, me, ab_state)
+        ab_board.draw_pause_board()
+        if not ab_state.game_paused:
+            ab_board.draw_score_board()
+            ab_board.draw_me_life()
+            me.blitme()
+            blit_bullet(ab_settings, bullet1s)
+            blit_enemy(ab_settings)
+            check_bullet_hit_enemy(ab_settings, bullet1s)
+            check_enemy_hit_me(ab_settings, me, ab_state)
     else:
         ab_settings.stop_all_music()
         ab_settings.update_recorded()

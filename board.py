@@ -2,10 +2,11 @@ import pygame
 
 
 class Board:
-    def __init__(self, ab_settings, screen):
+    def __init__(self, ab_settings, screen, ab_state):
         self.ab_settings = ab_settings
         self.screen = screen
         self.screen_rect = self.screen.get_rect()
+        self.ab_state = ab_state
         self.score_font = pygame.font.Font('fonts/font.ttf', 36)
         self.me_life = pygame.image.load('images/life.png').convert_alpha()
         self.me_life_rect = self.me_life.get_rect()
@@ -18,6 +19,17 @@ class Board:
         self.game_over_image = pygame.image.load("images/gameover.png").convert_alpha()
         self.game_over_rect = self.game_over_image.get_rect()
 
+        self.pause_nor_image = pygame.image.load('images/pause_nor.png').convert_alpha()
+        self.pause_pressed_image = pygame.image.load('images/pause_pressed.png').convert_alpha()
+        self.pause_rect = self.pause_nor_image.get_rect()
+        self.resume_nor_image = pygame.image.load('images/resume_nor.png').convert_alpha()
+        self.resume_pressed_image = pygame.image.load('images/resume_pressed.png').convert_alpha()
+        self.resume_rect = self.resume_nor_image.get_rect()
+        self.pause_rect.left = self.screen_rect.width - self.pause_rect.width - 10
+        self.pause_rect.top = 10
+        self.resume_rect.left = self.screen_rect.width - self.resume_rect.width - 10
+        self.resume_rect.top = 10
+        self.pause_resume_image = self.pause_nor_image
 
 
     def draw_score_board(self):
@@ -55,6 +67,9 @@ class Board:
         self.screen.blit(self.again_image, self.again_rect)
         self.screen.blit(self.game_over_image, self.game_over_rect)
 
+    def draw_pause_board(self):
+        # 默认显示暂停按钮
+        self.screen.blit(self.pause_resume_image, self.pause_rect)
 
 
 

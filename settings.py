@@ -44,6 +44,14 @@ class Settings:
         pygame.mixer.music.stop()
         self.enemy3_fly_sound.stop()
 
+    def pause_music(self):
+        pygame.mixer.music.pause()
+        self.enemy3_fly_sound.stop()
+
+    def resume_music(self):
+        pygame.mixer.music.unpause()
+        self.enemy3_fly_sound.play()
+
     def init_load_music_sound(self):
         pygame.mixer.music.load("sounds/game_music.ogg")
         pygame.mixer.music.set_volume(0.2)
