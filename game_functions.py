@@ -3,6 +3,24 @@ import pygame
 from pygame.locals import *
 
 
+def check_game_level(ab_settings, ab_state, enemy, screen):
+    if ab_state.game_level == 1 and ab_settings.score >= 50000:
+        ab_state.game_level = 2
+        update_game_level(ab_settings, enemy, [3, 2, 1], screen, False)
+
+    elif ab_state.game_level == 2 and ab_settings.score >= 300000:
+        ab_state.game_level = 3
+        update_game_level(ab_settings, enemy, [5, 3, 2], screen, True)
+    elif ab_state.game_level == 3 and ab_settings.score >= 600000:
+        ab_state.game_level = 4
+        update_game_level(ab_settings, enemy, [5, 3, 2], screen, True)
+    elif ab_state.game_level == 4 and ab_settings.score >= 1000000:
+        ab_state.game_level = 5
+        update_game_level(ab_settings, enemy, [5, 3, 2], screen, True)
+
+
+
+
 def check_me_move(me, ab_state):
     """检测我放飞机移动事件"""
     if ab_state.game_active and not ab_state.game_paused:
@@ -17,8 +35,9 @@ def check_me_move(me, ab_state):
             me.move_right()
 
 
-def check_event(me, ab_settings, ab_state, ab_board):
+def check_event(me, ab_settings, ab_state, ab_board, enemy, screen):
     check_me_move(me, ab_state)
+    check_game_level(ab_settings, ab_state, enemy, screen)
     for event in pygame.event.get():
         if event.type == QUIT:
             sys.exit()
@@ -60,6 +79,7 @@ def check_event(me, ab_settings, ab_state, ab_board):
 
 def set_game_paused(ab_settings):
     ab_settings.pause_music()
+
 
 def set_game_resume(ab_settings):
     ab_settings.resume_music()
@@ -121,27 +141,40 @@ def blit_bullet(ab_settings, bullet1s):
         bullet.blitme()
 
 
-def generate_small_enemys(enemy_type, num, ab_settings, screen):
+def generate_small_enemy(enemy, num, ab_settings, screen):
     for _ in range(num):
-        enemy1 = enemy_type.SmallEnemy(ab_settings, screen)
+        enemy1 = enemy.SmallEnemy(ab_settings, screen)
         ab_settings.enemys.add(enemy1)
         ab_settings.small_enemys.add(enemy1)
 
 
-def generate_mid_enemys(enemy_type, num, ab_settings, screen):
+def generate_mid_enemy(enemy, num, ab_settings, screen):
     for _ in range(num):
-        enemy2 = enemy_type.MidEnemy(ab_settings, screen)
-        ab_settings.enemys.add(enemy2)
-        ab_settings.mid_enemys.add(enemy2)
+        enemy1 = enemy.MidEnemy(ab_settings, screen)
+        ab_settings.enemys.add(enemy1)
+        ab_settings.mid_enemys.add(enemy1)
 
 
-def generate_big_enemys(enemy_type, num, ab_settings, screen):
+def generate_big_enemy(enemy, num, ab_settings, screen):
     for _ in range(num):
-        enemy3 = enemy_type.BigEnemy(ab_settings, screen)
-        ab_settings.enemys.add(enemy3)
-        ab_settings.big_enemys.add(enemy3)
+        enemy1 = enemy.BigEnemy(ab_settings, screen)
+        ab_settings.enemys.add(enemy1)
+        ab_settings.big_enemys.add(enemy1)
 
 
+def inc_speed(enemy, increment):
+    for e in enemy:
+        e.speed += increment
+
+
+def update_game_level(ab_settings, enemy, enemy_inc_num, screen, inc_mid_speed=False):
+    ab_settings.upgrade_sound.play()
+    generate_small_enemy(enemy, enemy_inc_num[0], ab_settings, screen)
+    generate_mid_enemy(enemy, enemy_inc_num[1], ab_settings, screen)
+    generate_big_enemy(enemy, enemy_inc_num[2], ab_settings, screen)
+    inc_speed(ab_settings.small_enemys, 1)
+    if inc_mid_speed:
+        inc_speed(ab_settings.mid_enemys, 1)
 
 def blit_enemy(ab_settings):
     for enemy_type in ab_settings.blit_enemy_order:
