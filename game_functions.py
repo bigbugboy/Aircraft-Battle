@@ -1,4 +1,4 @@
-import sys, time
+import sys, time, random
 import pygame
 from pygame.locals import *
 
@@ -35,15 +35,13 @@ def check_me_move(me, ab_state):
             me.move_right()
 
 
-def check_event(me, ab_settings, ab_state, ab_board, enemy, screen):
+def check_event(me, ab_settings, ab_state, ab_board, enemy, screen, ab_supply):
     check_me_move(me, ab_state)
     check_game_level(ab_settings, ab_state, enemy, screen)
     for event in pygame.event.get():
         if event.type == QUIT:
             sys.exit()
-        elif event.type == ab_settings.INVINCIBLE_TIME:
-            me.invincible = False
-            pygame.time.set_timer(ab_settings.INVINCIBLE_TIME, 0)
+
         elif event.type == MOUSEBUTTONDOWN:
             # 游戏结束时
             if not ab_state.game_active:
@@ -75,11 +73,29 @@ def check_event(me, ab_settings, ab_state, ab_board, enemy, screen):
                     ab_board.pause_resume_image = ab_board.resume_nor_image
                 else:
                     ab_board.pause_resume_image = ab_board.pause_nor_image
-
         elif event.type == KEYDOWN:
             if event.key == K_SPACE and ab_state.game_active and not ab_state.game_paused:
                 if ab_settings.bomb_left:
                     bomb_clear_screen_enemy(ab_settings)
+
+        elif event.type == ab_settings.INVINCIBLE_TIME:
+            me.invincible = False
+            pygame.time.set_timer(ab_settings.INVINCIBLE_TIME, 0)
+
+        elif event.type == ab_settings.SUPPLY_TIME:
+            ab_settings.supply_sound.play()
+            supply = random.choice(ab_supply)
+            supply.reset()
+        elif event.type == ab_settings.DOUBLE_BULLET_TIME:
+            ab_settings.is_double_bullet = False
+            pygame.time.set_timer(ab_settings.DOUBLE_BULLET_TIME, 0)
+
+
+def generate_supply(ab_settings, screen, supply):
+    bomb_supply = supply.BombSupply(ab_settings, screen)
+    bullet_supply = supply.BulletSupply(ab_settings, screen)
+    return [bomb_supply, bullet_supply]
+
 
 
 def bomb_clear_screen_enemy(ab_settings):
@@ -99,7 +115,7 @@ def set_game_resume(ab_settings):
     ab_settings.resume_music()
 
 
-def update_screen(ab_settings, screen, me, bullet1s, ab_board, ab_state):
+def update_screen(ab_settings, screen, me, bullet1s, ab_board, ab_state, ab_supply):
     screen.blit(ab_settings.bg_image, (0, 0))
     if ab_state.game_active:
         ab_board.draw_pause_board()
@@ -110,6 +126,8 @@ def update_screen(ab_settings, screen, me, bullet1s, ab_board, ab_state):
             me.blitme()
             blit_bullet(ab_settings, bullet1s)
             blit_enemy(ab_settings)
+            blit_supply(ab_supply)
+            check_supply_hit_me(ab_settings, me, ab_supply)
             check_bullet_hit_enemy(ab_settings, bullet1s)
             check_enemy_hit_me(ab_settings, me, ab_state)
     else:
@@ -196,6 +214,29 @@ def blit_enemy(ab_settings):
         for enemy in enemy_type:
             enemy.move()
             enemy.blitme()
+
+
+def blit_supply(ab_supply):
+    for supply in ab_supply:
+        if supply.active:
+            supply.move()
+            supply.blitme()
+
+
+def check_supply_hit_me(ab_settings, me, ab_supply):
+    for supply in ab_supply:
+        if supply.active:
+            if pygame.sprite.collide_mask(me, supply):
+                supply.active = False
+                if supply.name == 'bomb_supply':
+                    ab_settings.get_bomb_sound.play()
+                    if ab_settings.bomb_left < 3:
+                        ab_settings.bomb_left += 1
+                elif supply.name == 'bullet_supply':
+                    ab_settings.get_bullet_sound.play()
+                    ab_settings.is_double_bullet = True
+                    pygame.time.set_timer(ab_settings.DOUBLE_BULLET_TIME, 18 * 1000)    # 18s双弹模式
+
 
 
 def check_bullet_hit_enemy(ab_settings, bullet1s):

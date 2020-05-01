@@ -5,7 +5,7 @@ from my_ship import Ship
 from bullet import Bullet1
 from board import Board
 from game_status import GameStatus
-import enemy
+import enemy, supply
 import game_functions as gf
 
 
@@ -17,15 +17,17 @@ def main():
     ab_board = Board(ab_settings, screen, ab_state)
     me = Ship(screen, ab_settings)
     bullet1s = gf.generate_bullet(Bullet1, screen, ab_settings, me)
+    ab_supply = gf.generate_supply(ab_settings, screen, supply)
     gf.generate_small_enemy(enemy, 15, ab_settings, screen)
     gf.generate_mid_enemy(enemy, 5, ab_settings, screen)
     gf.generate_big_enemy(enemy, 1, ab_settings, screen)
 
+
     while 1:
-        gf.check_event(me, ab_settings, ab_state, ab_board, enemy, screen)
+        gf.check_event(me, ab_settings, ab_state, ab_board, enemy, screen, ab_supply)
         gf.is_switch_image(ab_settings)
         gf.update_delay(ab_settings)
-        gf.update_screen(ab_settings, screen, me, bullet1s, ab_board, ab_state)
+        gf.update_screen(ab_settings, screen, me, bullet1s, ab_board, ab_state, ab_supply)
 
         pygame.display.flip()
         ab_settings.clock.tick(60)

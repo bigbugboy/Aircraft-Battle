@@ -27,7 +27,11 @@ class Settings:
         self.recorded = self.get_recorded()
         self.me_life_left = 3
         self.INVINCIBLE_TIME = pygame.USEREVENT
+        self.SUPPLY_TIME = pygame.USEREVENT + 1
+        self.start_supply_time(supply_interval=30)
         self.bomb_left = 3
+        self.is_double_bullet = False
+        self.DOUBLE_BULLET_TIME = pygame.USEREVENT + 2  # 18s的双弹模式计时器
 
     def init_game(self):
         pygame.init()
@@ -44,10 +48,12 @@ class Settings:
     def stop_all_music(self):
         pygame.mixer.music.stop()
         self.enemy3_fly_sound.stop()
+        self.supply_sound.stop()
 
     def pause_music(self):
         pygame.mixer.music.pause()
         self.enemy3_fly_sound.stop()
+        self.supply_sound.stop()
 
     def resume_music(self):
         pygame.mixer.music.unpause()
@@ -100,3 +106,7 @@ class Settings:
             self.recorded = self.score
             with open('recorded.txt', 'w', encoding='utf-8') as f:
                 f.write(str(self.score))
+
+    def start_supply_time(self, supply_interval):
+        # 每隔30s发一个补给装备， 时间单位毫秒
+        pygame.time.set_timer(self.SUPPLY_TIME, supply_interval * 1000)
