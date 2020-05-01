@@ -17,12 +17,11 @@ def main():
     ab_board = Board(ab_settings, screen, ab_state)
     me = Ship(screen, ab_settings)
     ab_supply = gf.generate_supply(ab_settings, screen, supply)
-    bullet1s = gf.generate_bullet1(Bullet1, screen, ab_settings, me)
-    bullet2s = gf.generate_bullet2(Bullet2, screen, ab_settings, me)
+    bullet1s = gf.generate_bullet1(Bullet1, screen, ab_settings)
+    bullet2s = gf.generate_bullet2(Bullet2, screen, ab_settings)
     gf.generate_small_enemy(enemy, 15, ab_settings, screen)
     gf.generate_mid_enemy(enemy, 5, ab_settings, screen)
     gf.generate_big_enemy(enemy, 1, ab_settings, screen)
-
 
     while 1:
         gf.check_event(me, ab_settings, ab_state, ab_board, enemy, screen, ab_supply)
@@ -33,7 +32,6 @@ def main():
 
         pygame.display.flip()
         ab_settings.clock.tick(60)
-
 
 
 if __name__ == '__main__':

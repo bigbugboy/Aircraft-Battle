@@ -8,7 +8,7 @@ class Supply(pygame.sprite.Sprite):
         self.ab_settings = ab_settings
         self.screen = screen
         self.screen_rect = self.screen.get_rect()
-        self.active = False
+        self.active = False     # 初始无效，补给事件触发，自动激活active
         self.speed = 5
         self.image = pygame.image.load('images/bomb_supply.png').convert_alpha()
         self.rect = self.image.get_rect()

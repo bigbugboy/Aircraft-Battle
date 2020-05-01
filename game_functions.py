@@ -1,26 +1,25 @@
-import sys, time, random
+import sys, random
 import pygame
 from pygame.locals import *
 
 
 def check_game_level(ab_settings, ab_state, enemy, screen):
-    if ab_state.game_level == 1 and ab_settings.score >= 50000:
+    if ab_state.game_level == 1 and ab_settings.score >= ab_state.score_level_2:
         ab_state.game_level = 2
         update_game_level(ab_settings, enemy, [3, 2, 1], screen, False)
-
-    elif ab_state.game_level == 2 and ab_settings.score >= 300000:
+    elif ab_state.game_level == 2 and ab_settings.score >= ab_state.score_level_3:
         ab_state.game_level = 3
         update_game_level(ab_settings, enemy, [5, 3, 2], screen, True)
-    elif ab_state.game_level == 3 and ab_settings.score >= 600000:
+    elif ab_state.game_level == 3 and ab_settings.score >= ab_state.score_level_4:
         ab_state.game_level = 4
         update_game_level(ab_settings, enemy, [5, 3, 2], screen, True)
-    elif ab_state.game_level == 4 and ab_settings.score >= 1000000:
+    elif ab_state.game_level == 4 and ab_settings.score >= ab_state.score_level_5:
         ab_state.game_level = 5
         update_game_level(ab_settings, enemy, [5, 3, 2], screen, True)
 
 
 def check_me_move(me, ab_state):
-    """检测我放飞机移动事件"""
+    """检测我方飞机移动事件"""
     if ab_state.game_active and not ab_state.game_paused:
         key_pressed = pygame.key.get_pressed()
         if key_pressed[K_w] or key_pressed[K_UP]:
@@ -38,19 +37,18 @@ def check_event(me, ab_settings, ab_state, ab_board, enemy, screen, ab_supply):
     check_game_level(ab_settings, ab_state, enemy, screen)
     for event in pygame.event.get():
         if event.type == QUIT:
+            ab_settings.update_recorded()
+            pygame.quit()
             sys.exit()
 
         elif event.type == MOUSEBUTTONDOWN:
             # 游戏结束时
             if not ab_state.game_active:
                 if event.button == 1 and ab_board.again_rect.collidepoint(event.pos):
-                    ab_settings.bullet_sound.play()
-                    time.sleep(0.6)
-                    import main
-                    main.main()
+                    reset_game()
                 elif event.button == 1 and ab_board.game_over_rect.collidepoint(event.pos):
                     sys.exit()
-            else:
+            elif ab_state.game_start:
                 if event.button == 1 and ab_board.pause_rect.collidepoint(event.pos):
                     ab_state.game_paused = not ab_state.game_paused
                     if ab_state.game_paused:
@@ -61,18 +59,34 @@ def check_event(me, ab_settings, ab_state, ab_board, enemy, screen, ab_supply):
                         set_game_resume(ab_settings)
 
         elif event.type == MOUSEMOTION:
-            if ab_board.pause_rect.collidepoint(event.pos):
-                if ab_state.game_paused:
-                    ab_board.pause_resume_image = ab_board.resume_pressed_image
+            # 游戏未结束时
+            if ab_state.game_start and ab_state.game_active:
+                if ab_board.pause_rect.collidepoint(event.pos):
+                    ab_board.is_confirm = True
+                    if ab_state.game_paused:
+                        ab_board.pause_resume_image = ab_board.resume_pressed_image
+                    else:
+                        ab_board.pause_resume_image = ab_board.pause_pressed_image
                 else:
-                    ab_board.pause_resume_image = ab_board.pause_pressed_image
-            else:
-                if ab_state.game_paused:
-                    ab_board.pause_resume_image = ab_board.resume_nor_image
+                    ab_board.is_confirm = False
+                    pygame.mouse.set_visible(True)
+                    if ab_state.game_paused:
+                        ab_board.pause_resume_image = ab_board.resume_nor_image
+                    else:
+                        ab_board.pause_resume_image = ab_board.pause_nor_image
+            elif not ab_state.game_active:
+                if ab_board.again_rect.collidepoint(event.pos):
+                    ab_board.is_confirm = True
+                elif ab_board.game_over_rect.collidepoint(event.pos):
+                    ab_board.is_confirm = True
                 else:
-                    ab_board.pause_resume_image = ab_board.pause_nor_image
+                    ab_board.is_confirm = False
+                    pygame.mouse.set_visible(True)
+
         elif event.type == KEYDOWN:
-            if event.key == K_SPACE and ab_state.game_active and not ab_state.game_paused:
+            if not ab_state.game_start:
+                ab_state.game_start = True
+            elif event.key == K_SPACE and not ab_state.game_paused:
                 if ab_settings.bomb_left:
                     bomb_clear_screen_enemy(ab_settings)
 
@@ -81,12 +95,19 @@ def check_event(me, ab_settings, ab_state, ab_board, enemy, screen, ab_supply):
             pygame.time.set_timer(ab_settings.INVINCIBLE_TIME, 0)
 
         elif event.type == ab_settings.SUPPLY_TIME:
-            ab_settings.supply_sound.play()
-            supply = random.choice(ab_supply)
-            supply.reset()
+            if ab_state.game_start and not ab_state.game_paused:
+                ab_settings.supply_sound.play()
+                supply = random.choice(ab_supply)
+                supply.reset()
         elif event.type == ab_settings.DOUBLE_BULLET_TIME:
             ab_settings.is_double_bullet = False
             pygame.time.set_timer(ab_settings.DOUBLE_BULLET_TIME, 0)
+
+
+def reset_game():
+    pygame.mouse.set_visible(True)
+    import main
+    main.main()
 
 
 def generate_supply(ab_settings, screen, supply):
@@ -106,10 +127,12 @@ def bomb_clear_screen_enemy(ab_settings):
 
 def set_game_paused(ab_settings):
     ab_settings.pause_music()
+    pygame.time.set_timer(ab_settings.SUPPLY_TIME, 0)
 
 
 def set_game_resume(ab_settings):
     ab_settings.resume_music()
+    pygame.time.set_timer(ab_settings.SUPPLY_TIME, 30*1000)
 
 
 def check_bullet_type(ab_settings, bullet1s, bullet2s):
@@ -119,7 +142,12 @@ def check_bullet_type(ab_settings, bullet1s, bullet2s):
 
 def update_screen(ab_settings, screen, me, bullets, ab_board, ab_state, ab_supply):
     screen.blit(ab_settings.bg_image, (0, 0))
-    if ab_state.game_active:
+    if not ab_state.game_start:
+        ab_board.draw_game_start()
+        blit_bullet(ab_settings, bullets, me)
+        me.blitme()
+
+    elif ab_state.game_active:
         ab_board.draw_pause_board()
         if not ab_state.game_paused:
             ab_board.draw_score_board()
@@ -139,6 +167,8 @@ def update_screen(ab_settings, screen, me, bullets, ab_board, ab_state, ab_suppl
         ab_board.draw_final_score()
         ab_board.draw_game_over_or_again()
 
+    ab_board.draw_confirm_mouse()
+
 
 def is_switch_image(ab_settings):
     """每5帧切换一下我方飞机的图片"""
@@ -157,23 +187,20 @@ def update_delay(ab_settings):
         ab_settings.delay = 100
 
 
-def generate_bullet1(Bullet1, screen, ab_settings, me):
+def generate_bullet1(Bullet1, screen, ab_settings):
     bullet1s = []
     bullet_num = 4
-    position = me.rect.centerx, me.rect.top - 5
     for _ in range(bullet_num):
-        bullet1s.append(Bullet1(screen, ab_settings, position))
+        bullet1s.append(Bullet1(screen, ab_settings))
     return bullet1s
 
 
-def generate_bullet2(Bullet2, screen, ab_settings, me):
+def generate_bullet2(Bullet2, screen, ab_settings):
     bullet2s = []
     bullet_num = 8
-    position_left = me.rect.centerx- 33, me.rect.centery
-    position_right = me.rect.centerx + 30, me.rect.centery
     for _ in range(bullet_num // 2):
-        bullet2s.append(Bullet2(screen, ab_settings, position_left))
-        bullet2s.append(Bullet2(screen, ab_settings, position_right))
+        bullet2s.append(Bullet2(screen, ab_settings))
+        bullet2s.append(Bullet2(screen, ab_settings))
     return bullet2s
 
 
@@ -293,5 +320,6 @@ def check_enemy_hit_me(ab_settings, me, ab_state):
             ab_settings.me_life_left -= 1
             if ab_settings.me_life_left == 0:
                 ab_state.game_active = False
+                pygame.time.delay(100)
             for enemy in enemy_down:
                 enemy.active = False

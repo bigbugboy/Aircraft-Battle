@@ -12,9 +12,6 @@ class Enemy(pygame.sprite.Sprite):
         self.hit = False
 
 
-
-
-
 class SmallEnemy(Enemy):
 
     energy = 1
@@ -155,13 +152,14 @@ class BigEnemy(Enemy):
 
     def move(self):
         if self.rect.bottom == -50:
-            self.ab_settings.enemy3_fly_sound.play()
+            self.ab_settings.enemy3_fly_sound.play(-1)
         if not self.active:
             self.ab_settings.enemy3_fly_sound.stop()
         if self.rect.top < self.screen_rect.height:
             self.rect.top += self.speed
         else:
             self.reset()
+            self.ab_settings.enemy3_fly_sound.stop()
 
     def reset(self):
         self.active = True
