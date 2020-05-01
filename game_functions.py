@@ -45,11 +45,13 @@ def check_event(me, ab_settings, ab_state, ab_board, enemy, screen, ab_supply):
             # 游戏结束时
             if not ab_state.game_active:
                 if event.button == 1 and ab_board.again_rect.collidepoint(event.pos):
+                    ab_settings.button_sound.play()
                     reset_game()
                 elif event.button == 1 and ab_board.game_over_rect.collidepoint(event.pos):
                     sys.exit()
             elif ab_state.game_start:
                 if event.button == 1 and ab_board.pause_rect.collidepoint(event.pos):
+                    ab_settings.button_sound.play()
                     ab_state.game_paused = not ab_state.game_paused
                     if ab_state.game_paused:
                         ab_board.pause_resume_image = ab_board.resume_nor_image

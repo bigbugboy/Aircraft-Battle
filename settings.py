@@ -73,6 +73,8 @@ class Settings:
         pygame.mixer.music.set_volume(0.1)
         self.bullet_sound = pygame.mixer.Sound("sounds/bullet.wav")
         self.bullet_sound.set_volume(0.1)
+        self.button_sound = pygame.mixer.Sound("sounds/button.wav")
+        self.button_sound.set_volume(0.1)
         self.bomb_sound = pygame.mixer.Sound("sounds/use_bomb.wav")
         self.bomb_sound.set_volume(0.2)
         self.supply_sound = pygame.mixer.Sound("sounds/supply.wav")
