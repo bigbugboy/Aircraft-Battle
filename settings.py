@@ -15,6 +15,9 @@ class Settings:
         self.switch_image = True
         self.bullet1_num = 4
         self.bullet1_index = 0      # 绘制是切换索引
+        self.bullet2_num = 8
+        self.bullet2_index = 8
+        self.bullet2_index = 0
         self.e1_destroy_index = 0  # 小型敌机击中时绘制切换索引
         self.e2_destroy_index = 0
         self.e3_destroy_index = 0

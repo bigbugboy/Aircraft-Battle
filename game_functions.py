@@ -19,8 +19,6 @@ def check_game_level(ab_settings, ab_state, enemy, screen):
         update_game_level(ab_settings, enemy, [5, 3, 2], screen, True)
 
 
-
-
 def check_me_move(me, ab_state):
     """检测我放飞机移动事件"""
     if ab_state.game_active and not ab_state.game_paused:
@@ -97,7 +95,6 @@ def generate_supply(ab_settings, screen, supply):
     return [bomb_supply, bullet_supply]
 
 
-
 def bomb_clear_screen_enemy(ab_settings):
     ab_settings.bomb_sound.play()
     ab_settings.bomb_left -= 1
@@ -115,7 +112,12 @@ def set_game_resume(ab_settings):
     ab_settings.resume_music()
 
 
-def update_screen(ab_settings, screen, me, bullet1s, ab_board, ab_state, ab_supply):
+def check_bullet_type(ab_settings, bullet1s, bullet2s):
+    bullets = bullet2s if ab_settings.is_double_bullet else bullet1s
+    return bullets
+
+
+def update_screen(ab_settings, screen, me, bullets, ab_board, ab_state, ab_supply):
     screen.blit(ab_settings.bg_image, (0, 0))
     if ab_state.game_active:
         ab_board.draw_pause_board()
@@ -124,11 +126,11 @@ def update_screen(ab_settings, screen, me, bullet1s, ab_board, ab_state, ab_supp
             ab_board.draw_me_life()
             ab_board.draw_bomb_board()
             me.blitme()
-            blit_bullet(ab_settings, bullet1s)
+            blit_bullet(ab_settings, bullets, me)
             blit_enemy(ab_settings)
             blit_supply(ab_supply)
             check_supply_hit_me(ab_settings, me, ab_supply)
-            check_bullet_hit_enemy(ab_settings, bullet1s)
+            check_bullet_hit_enemy(ab_settings, bullets)
             check_enemy_hit_me(ab_settings, me, ab_state)
     else:
         ab_settings.stop_all_music()
@@ -155,21 +157,38 @@ def update_delay(ab_settings):
         ab_settings.delay = 100
 
 
-def generate_bullet(Bullet1, screen, ab_settings, me):
+def generate_bullet1(Bullet1, screen, ab_settings, me):
     bullet1s = []
     bullet_num = 4
+    position = me.rect.centerx, me.rect.top - 5
     for _ in range(bullet_num):
-        bullet1s.append(Bullet1(screen, ab_settings, me))
+        bullet1s.append(Bullet1(screen, ab_settings, position))
     return bullet1s
 
 
-def blit_bullet(ab_settings, bullet1s):
+def generate_bullet2(Bullet2, screen, ab_settings, me):
+    bullet2s = []
+    bullet_num = 8
+    position_left = me.rect.centerx- 33, me.rect.centery
+    position_right = me.rect.centerx + 30, me.rect.centery
+    for _ in range(bullet_num // 2):
+        bullet2s.append(Bullet2(screen, ab_settings, position_left))
+        bullet2s.append(Bullet2(screen, ab_settings, position_right))
+    return bullet2s
+
+
+def blit_bullet(ab_settings, bullets, me):
     # 每个10帧，重置一个子弹的位置
     if not (ab_settings.delay % 10):
         ab_settings.bullet_sound.play()
-        bullet1s[ab_settings.bullet1_index].reset()
-        ab_settings.bullet1_index = (ab_settings.bullet1_index + 1) % ab_settings.bullet1_num
-    for bullet in bullet1s:
+        if ab_settings.is_double_bullet:
+            bullets[ab_settings.bullet2_index].reset((me.rect.centerx - 33, me.rect.centery))
+            bullets[ab_settings.bullet2_index + 1].reset((me.rect.centerx + 30, me.rect.centery))
+            ab_settings.bullet2_index = (ab_settings.bullet2_index + 2) % ab_settings.bullet2_num
+        else:
+            bullets[ab_settings.bullet1_index].reset((me.rect.centerx, me.rect.top - 5))
+            ab_settings.bullet1_index = (ab_settings.bullet1_index + 1) % ab_settings.bullet1_num
+    for bullet in bullets:
         bullet.move()
         bullet.blitme()
 
@@ -209,6 +228,7 @@ def update_game_level(ab_settings, enemy, enemy_inc_num, screen, inc_mid_speed=F
     if inc_mid_speed:
         inc_speed(ab_settings.mid_enemys, 1)
 
+
 def blit_enemy(ab_settings):
     for enemy_type in ab_settings.blit_enemy_order:
         for enemy in enemy_type:
@@ -238,9 +258,8 @@ def check_supply_hit_me(ab_settings, me, ab_supply):
                     pygame.time.set_timer(ab_settings.DOUBLE_BULLET_TIME, 18 * 1000)    # 18s双弹模式
 
 
-
-def check_bullet_hit_enemy(ab_settings, bullet1s):
-    for bullet in bullet1s:
+def check_bullet_hit_enemy(ab_settings, bullets):
+    for bullet in bullets:
         if bullet.active:
             enemy_hit = pygame.sprite.spritecollide(bullet, ab_settings.enemys, False, pygame.sprite.collide_mask)
             if enemy_hit:

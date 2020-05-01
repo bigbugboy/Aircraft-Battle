@@ -2,7 +2,7 @@ import pygame
 
 from settings import Settings
 from my_ship import Ship
-from bullet import Bullet1
+from bullet import Bullet1, Bullet2
 from board import Board
 from game_status import GameStatus
 import enemy, supply
@@ -16,8 +16,9 @@ def main():
     ab_state = GameStatus(ab_settings)
     ab_board = Board(ab_settings, screen, ab_state)
     me = Ship(screen, ab_settings)
-    bullet1s = gf.generate_bullet(Bullet1, screen, ab_settings, me)
     ab_supply = gf.generate_supply(ab_settings, screen, supply)
+    bullet1s = gf.generate_bullet1(Bullet1, screen, ab_settings, me)
+    bullet2s = gf.generate_bullet2(Bullet2, screen, ab_settings, me)
     gf.generate_small_enemy(enemy, 15, ab_settings, screen)
     gf.generate_mid_enemy(enemy, 5, ab_settings, screen)
     gf.generate_big_enemy(enemy, 1, ab_settings, screen)
@@ -27,7 +28,8 @@ def main():
         gf.check_event(me, ab_settings, ab_state, ab_board, enemy, screen, ab_supply)
         gf.is_switch_image(ab_settings)
         gf.update_delay(ab_settings)
-        gf.update_screen(ab_settings, screen, me, bullet1s, ab_board, ab_state, ab_supply)
+        bullets = gf.check_bullet_type(ab_settings, bullet1s, bullet2s)
+        gf.update_screen(ab_settings, screen, me, bullets, ab_board, ab_state, ab_supply)
 
         pygame.display.flip()
         ab_settings.clock.tick(60)
