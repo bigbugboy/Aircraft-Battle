@@ -31,10 +31,21 @@ class Board:
         self.resume_rect.top = 10
         self.pause_resume_image = self.pause_nor_image
 
+        self.bomb_image = pygame.image.load('images/bomb.png').convert_alpha()
+        self.bomb_rect = self.bomb_image.get_rect()
+        self.bomb_font = self.game_over_score_font
+
+    def draw_bomb_board(self):
+        bomb_text = f'x{self.ab_settings.bomb_left}'
+        bomb_text_surface = self.bomb_font.render(bomb_text, True, self.ab_settings.WHITE)
+        bomb_text_rect = bomb_text_surface.get_rect()
+        self.screen.blit(self.bomb_image, (10, self.screen_rect.height - self.bomb_rect.height - 10))
+        self.screen.blit(bomb_text_surface, (20 + self.bomb_rect.width, self.screen_rect.height - 5 - bomb_text_rect.height))
 
     def draw_score_board(self):
         score_text = f'Scores : {self.ab_settings.score}'
         score_surface = self.score_font.render(score_text, True, self.ab_settings.WHITE)
+
         self.screen.blit(score_surface, (10, 5))
 
     def draw_me_life(self):

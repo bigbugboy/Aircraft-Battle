@@ -76,6 +76,20 @@ def check_event(me, ab_settings, ab_state, ab_board, enemy, screen):
                 else:
                     ab_board.pause_resume_image = ab_board.pause_nor_image
 
+        elif event.type == KEYDOWN:
+            if event.key == K_SPACE and ab_state.game_active and not ab_state.game_paused:
+                if ab_settings.bomb_left:
+                    bomb_clear_screen_enemy(ab_settings)
+
+
+def bomb_clear_screen_enemy(ab_settings):
+    ab_settings.bomb_sound.play()
+    ab_settings.bomb_left -= 1
+    for enemy in ab_settings.enemys:
+        if 0 < enemy.rect.bottom < ab_settings.height + enemy.rect.height:
+            enemy.active = False
+            update_score(enemy, ab_settings)
+
 
 def set_game_paused(ab_settings):
     ab_settings.pause_music()
@@ -92,6 +106,7 @@ def update_screen(ab_settings, screen, me, bullet1s, ab_board, ab_state):
         if not ab_state.game_paused:
             ab_board.draw_score_board()
             ab_board.draw_me_life()
+            ab_board.draw_bomb_board()
             me.blitme()
             blit_bullet(ab_settings, bullet1s)
             blit_enemy(ab_settings)

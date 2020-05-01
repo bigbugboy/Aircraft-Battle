@@ -27,6 +27,7 @@ class Settings:
         self.recorded = self.get_recorded()
         self.me_life_left = 3
         self.INVINCIBLE_TIME = pygame.USEREVENT
+        self.bomb_left = 3
 
     def init_game(self):
         pygame.init()
@@ -50,11 +51,10 @@ class Settings:
 
     def resume_music(self):
         pygame.mixer.music.unpause()
-        self.enemy3_fly_sound.play()
 
     def init_load_music_sound(self):
         pygame.mixer.music.load("sounds/game_music.ogg")
-        pygame.mixer.music.set_volume(0.2)
+        pygame.mixer.music.set_volume(0.1)
         self.bullet_sound = pygame.mixer.Sound("sounds/bullet.wav")
         self.bullet_sound.set_volume(0.2)
         self.bomb_sound = pygame.mixer.Sound("sounds/use_bomb.wav")
