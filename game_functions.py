@@ -9,7 +9,7 @@ def check_game_level(ab_settings, ab_state, enemy, screen):
         update_game_level(ab_settings, enemy, [3, 2, 1], screen, False)
     elif ab_state.game_level == 2 and ab_settings.score >= ab_state.score_level_3:
         ab_state.game_level = 3
-        update_game_level(ab_settings, enemy, [5, 3, 2], screen, True)
+        update_game_level(ab_settings, enemy, [5, 3, 2], screen, False)
     elif ab_state.game_level == 3 and ab_settings.score >= ab_state.score_level_4:
         ab_state.game_level = 4
         update_game_level(ab_settings, enemy, [5, 3, 2], screen, True)
@@ -189,21 +189,14 @@ def update_delay(ab_settings):
         ab_settings.delay = 100
 
 
-def generate_bullet1(Bullet1, screen, ab_settings):
-    bullet1s = []
-    bullet_num = 4
+def generate_bullet(bullet_type, screen, ab_settings):
+    bullets = []
+    bullet_num = ab_settings.bullet1_num
+    if bullet_type.is_super_bullet:
+        bullet_num = ab_settings.bullet2_num
     for _ in range(bullet_num):
-        bullet1s.append(Bullet1(screen, ab_settings))
-    return bullet1s
-
-
-def generate_bullet2(Bullet2, screen, ab_settings):
-    bullet2s = []
-    bullet_num = 8
-    for _ in range(bullet_num // 2):
-        bullet2s.append(Bullet2(screen, ab_settings))
-        bullet2s.append(Bullet2(screen, ab_settings))
-    return bullet2s
+        bullets.append(bullet_type(screen, ab_settings))
+    return bullets
 
 
 def blit_bullet(ab_settings, bullets, me):

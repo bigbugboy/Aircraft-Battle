@@ -33,6 +33,9 @@ class Bullet(pygame.sprite.Sprite):
 
 
 class Bullet1(Bullet):
+
+    is_super_bullet = False
+
     def __init__(self, screen, ab_settings):
         super().__init__(screen, ab_settings)
         self.ab_settings = ab_settings
@@ -41,6 +44,9 @@ class Bullet1(Bullet):
 
 
 class Bullet2(Bullet):
+
+    is_super_bullet = True
+
     def __init__(self, screen, ab_settings):
         super().__init__(screen, ab_settings)
         self.image = pygame.image.load('images/bullet2.png').convert_alpha()
